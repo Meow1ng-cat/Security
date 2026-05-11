@@ -1,7 +1,9 @@
 repos:
-  - repo: https://github.com/pypa/pip-audit
-    rev: v2.7.3
+  - repo: local
     hooks:
       - id: pip-audit
-        args: ["-r", "src/requirements.txt"]  
-        files: src/requirements.txt            
+        name: pip-audit
+        entry: bash -c 'pip-audit -r src/requirements.txt'
+        language: system
+        files: src/requirements.txt
+        pass_filenames: false
