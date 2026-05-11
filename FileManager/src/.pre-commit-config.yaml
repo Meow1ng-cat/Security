@@ -3,6 +3,8 @@ repos:
     hooks:
       - id: pip-audit
         name: pip-audit
-        entry: pip-audit -r requirements.txt
+        entry: pip-audit
         language: system
+        args: ["-r", "requirements.txt"]
+        files: requirements.txt
         pass_filenames: false
