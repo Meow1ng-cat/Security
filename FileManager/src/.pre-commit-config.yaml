@@ -1,7 +1,0 @@
--   repo: local
-    hooks:
-    -   id: pip-audit
-        name: pip-audit
-        entry: pip-audit
-        language: system
-        files: requirements.txt
