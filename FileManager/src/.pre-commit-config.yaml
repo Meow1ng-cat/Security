@@ -5,4 +5,4 @@ repos:
         name: pip-audit
         entry: pip-audit -r requirements.txt
         language: system
-        files: requirements.txt
+        pass_filenames: false
