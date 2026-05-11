@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Комментарии</title>
+</head>
+<body>
+    <h1>Стена комментариев</h1>
+    <form method="post">
+        <textarea name="text" rows="4" cols="50"></textarea><br>
+        <button type="submit">Отправить</button>
+    </form>
+    <h2>Ранее оставленные:</h2>
+    <ul>
+        {% for comment in comments %}
+            <li>{{ comment|safe }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
