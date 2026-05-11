@@ -3,5 +3,5 @@ repos:
     rev: v2.7.3
     hooks:
       - id: pip-audit
-        args: ["-r", "requirements.txt"]
-        files: requirements.txt
+        args: ["-r", "src/requirements.txt"]  
+        files: src/requirements.txt            
