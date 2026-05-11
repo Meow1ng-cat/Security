@@ -1,8 +1,7 @@
-repos:
-  - repo: local
+-   repo: local
     hooks:
-      - id: pip-audit
+    -   id: pip-audit
         name: pip-audit
-        entry: pip-audit -r requirements.txt
+        entry: pip-audit
         language: system
-        files: ^requirements\.txt$
+        files: requirements.txt
