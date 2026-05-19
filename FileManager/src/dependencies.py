@@ -10,13 +10,12 @@ users = [
 
 files_db: List[dict] = [
     {"id": 1, "name": "alice_report.pdf", "size": 123, "owner_id": 1,
-     "original_name": "alice_report.pdf", "path": "storage/1_uuid.pdf"},
+     "original_name": "alice_report.pdf", "path": "storage/1_uuid.pdf", "is_encrypted": False},
     {"id": 2, "name": "bob_notes.txt", "size": 456, "owner_id": 2,
-     "original_name": "bob_notes.txt", "path": "storage/2_uuid.txt"},
+     "original_name": "bob_notes.txt", "path": "storage/2_uuid.txt", "is_encrypted": False},
     {"id": 3, "name": "admin_plan.docx", "size": 789, "owner_id": 3,
-     "original_name": "admin_plan.docx", "path": "storage/3_uuid.docx"},
+     "original_name": "admin_plan.docx", "path": "storage/3_uuid.docx", "is_encrypted": False},
 ]
-
 
 class User(BaseModel):
     id: int
