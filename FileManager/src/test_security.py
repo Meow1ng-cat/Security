@@ -4,22 +4,23 @@ from main import app
 client = TestClient(app)
 
 def test_idor_returns_404():
-    r = client.get("/files/2", params={"user_id": 1})
-    assert r.status_code == 404
+    response = client.get("/files/2", headers={"X-User-Name": "alice"})
+    assert response.status_code == 404
 
 def test_owner_can_read():
-    r = client.get("/files/1", params={"user_id": 1})
-    assert r.status_code == 200
+    response = client.get("/files/1", headers={"X-User-Name": "alice"})
+    assert response.status_code == 200
 
 def test_admin_can_read():
-    r = client.get("/files/2", params={"user_id": 3})
-    assert r.status_code == 200
+    response = client.get("/files/2", headers={"X-User-Name": "admin"})
+    assert response.status_code == 200
+
 def test_admin_can_delete():
-    before = len(client.get("/files/all", params={"user_id": 3}).json())
-    assert before > 0
+    before = client.get("/files/all", headers={"X-User-Name": "admin"}).json()
+    assert len(before) > 0
 
-    r = client.delete("/files/2", params={"user_id": 3})
-    assert r.status_code == 200
+    response = client.delete("/files/2", headers={"X-User-Name": "admin"})
+    assert response.status_code == 200
 
-    after = len(client.get("/files/all", params={"user_id": 3}).json())
-    assert after == before - 1
+    after = client.get("/files/all", headers={"X-User-Name": "admin"}).json()
+    assert len(after) == len(before) - 1

@@ -1,5 +1,6 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Header
 from pydantic import BaseModel
+from typing import Optional
 
 users = [
     {"id": 1, "username": "alice", "role": "user"},
@@ -12,14 +13,16 @@ class User(BaseModel):
     username: str
     role: str
 
-def get_current_user(user_id: int) -> User:
+def get_current_user(x_user_name: Optional[str] = Header(None)) -> User:
+    if not x_user_name:
+        raise HTTPException(status_code=401, detail="Missing X-User-Name header")
     for u in users:
-        if u["id"] == user_id:
+        if u["username"] == x_user_name:
             return User(**u)
-    raise HTTPException(status_code=401, detail="Unauthorized")
+    raise HTTPException(status_code=401, detail="User not found")
 
 def check_file_permissions(file_id: int, current_user: User = Depends(get_current_user)):
-    from main import files_db
+    from main import files_db 
     for f in files_db:
         if f["id"] == file_id:
             if current_user.role == "admin" or f["owner_id"] == current_user.id:

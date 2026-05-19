@@ -51,7 +51,7 @@ async def post_comment(request: Request, text: str = Form(...)):
     return templates.TemplateResponse("comments.html", {"request": request, "comments": comments_store})
 
 @app.get("/files/{file_id}")
-def get_file(file = Depends(check_file_permissions)):
+def get_file(file_id: int, file = Depends(check_file_permissions)):
     return file
 
 @app.delete("/files/{file_id}")
