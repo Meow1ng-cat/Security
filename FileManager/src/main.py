@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import bleach
 from schemas import UserCreate
-from fastapi import HTTPException
 from dependencies import get_current_user, check_file_permissions
 
 app = FastAPI()
