@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, Header
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 users = [
     {"id": 1, "username": "alice", "role": "user"},
