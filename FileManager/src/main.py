@@ -49,16 +49,6 @@ async def post_comment(request: Request, text: str = Form(...)):
     comments_store.append(clean_text)
     return templates.TemplateResponse("comments.html", {"request": request, "comments": comments_store})
 
-@app.get("/files/{file_id}")
-def get_file(file_id: int, file = Depends(check_file_permissions)):
-    return file
-
-@app.delete("/files/{file_id}")
-def delete_file(file_id: int, file = Depends(check_file_permissions)):
-    global files_db
-    files_db = [f for f in files_db if f["id"] != file_id]
-    return {"msg": "Deleted", "file_id": file_id}
-
 @app.get("/files/my")
 def my_files(current_user: User = Depends(get_current_user)):
     return [f for f in files_db if f["owner_id"] == current_user.id]
@@ -68,3 +58,13 @@ def all_files(current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="Forbidden")
     return files_db
+
+@app.get("/files/{file_id}")
+def get_file(file_id: int, file = Depends(check_file_permissions)):
+    return file
+
+@app.delete("/files/{file_id}")
+def delete_file(file_id: int, file = Depends(check_file_permissions)):
+    global files_db
+    files_db = [f for f in files_db if f["id"] != file_id]
+    return {"msg": "Deleted", "file_id": file_id}
