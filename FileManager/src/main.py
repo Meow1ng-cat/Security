@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import bleach
 from schemas import UserCreate
-from dependencies import get_current_user, check_file_permissions
+from dependencies import get_current_user, check_file_permissions, User
 
 app = FastAPI()
 
