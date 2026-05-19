@@ -1,21 +1,24 @@
-from fastapi import FastAPI, Request, Form, Depends, HTTPException
+import uuid
+import os
+import aiofiles
+from fastapi import FastAPI, Request, Form, Depends, HTTPException, UploadFile, File as FastAPIFile
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+import filetype
 import bleach
 from schemas import UserCreate
-from dependencies import get_current_user, check_file_permissions, User
+from dependencies import files_db, get_current_user, check_file_permissions, User
+
+MAX_FILE_SIZE = 2 * 1024 * 1024
+ALLOWED_MIME_TYPES = ["image/jpeg", "image/png"]
+UPLOAD_DIR = "storage"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
 comments_store = []
-
-files_db = [
-    {"id": 1, "name": "alice_report.pdf", "size": 123, "owner_id": 1},
-    {"id": 2, "name": "bob_notes.txt", "size": 456, "owner_id": 2},
-    {"id": 3, "name": "admin_plan.docx", "size": 789, "owner_id": 3},
-]
 
 ALLOWED_TAGS = ['b', 'i', 'u', 'em', 'strong']
 
@@ -68,3 +71,54 @@ def delete_file(file_id: int, file = Depends(check_file_permissions)):
     global files_db
     files_db = [f for f in files_db if f["id"] != file_id]
     return {"msg": "Deleted", "file_id": file_id}
+
+@app.post("/files/upload")
+async def upload_file(
+    file: UploadFile = FastAPIFile(...),
+    current_user: User = Depends(get_current_user)
+):
+    content = await file.read(MAX_FILE_SIZE + 1)
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 2 MB)")
+    if len(content) == 0:
+        raise HTTPException(status_code=400, detail="Empty file")
+
+    kind = filetype.guess(content)
+    if kind is None or kind.mime not in ALLOWED_MIME_TYPES:
+        raise HTTPException(status_code=415, detail="Only JPEG/PNG images allowed")
+
+    if kind.mime == "image/jpeg":
+        ext = ".jpg"
+    elif kind.mime == "image/png":
+        ext = ".png"
+    else:
+        ext = ""
+    new_filename = f"{uuid.uuid4()}{ext}"
+    file_path = os.path.join(UPLOAD_DIR, new_filename)
+
+    async with aiofiles.open(file_path, "wb") as f:
+        await f.write(content)
+
+    new_id = max([f["id"] for f in files_db]) + 1 if files_db else 1
+    file_meta = {
+        "id": new_id,
+        "name": new_filename,
+        "original_name": file.filename,
+        "size": len(content),
+        "owner_id": current_user.id,
+        "path": file_path
+    }
+    files_db.append(file_meta)
+    return {"msg": "File uploaded", "file_id": new_id, "original_name": file.filename}
+
+@app.get("/files/{file_id}/download")
+async def download_file(file_meta: dict = Depends(check_file_permissions)):
+    file_path = file_meta["path"]
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+    return FileResponse(
+        path=file_path,
+        filename=file_meta["original_name"],
+        media_type="application/octet-stream",
+        headers={"Content-Disposition": f"attachment; filename=\"{file_meta['original_name']}\""}
+    )
